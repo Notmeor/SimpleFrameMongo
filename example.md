@@ -18,16 +18,6 @@ SimpleFrameMongo.config_settings = {
 }
 ```
 
-
-```python
-SimpleFrameMongo.config_settings = {
-    'name': 'yjs_product',
-    'mongo_host': '192.168.211.190:27017',
-    'username': 'yanjiusuo',
-    'password': 'yanjiusuo2018'
-}
-```
-
 ### 存入 dataframe
 
 
