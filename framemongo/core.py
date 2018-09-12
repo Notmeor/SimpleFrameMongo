@@ -22,7 +22,11 @@ class SimpleFrameMongo(object):
         
         self.fs = GridFS(self.db)
         
-    def write(self, name, df, metadata=''):
+    def write(self, name, df, metadata='', upsert=True):
+        
+        if upsert:
+            self.delete(name)
+            
         if name in self.fs.list():
             warnings.warn(
                 'filename `{}` already exists, nothing inserted'.format(name))
