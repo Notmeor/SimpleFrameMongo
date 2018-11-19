@@ -53,9 +53,15 @@ class SimpleFrameMongo(object):
         return self.db['fs.files'].find_one(
             {'filename': name}).get('metadata')
     
+    def list(self):
+        return self.fs.list()
+    
     def __enter__(self):
         return self
     
     def __exit__(self, et, ev, tb):
+        self.__del__()
+    
+    def __del__(self):
         self.db.client.close()
          
