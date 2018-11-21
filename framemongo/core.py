@@ -6,19 +6,35 @@ from gridfs import GridFS
 from bson import ObjectId
 from pandas.io.pickle import pkl
 
+import time, functools
+def timeit(func):
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        t0_ = time.time()
+        ret = func(*args, **kwargs)
+        print('%s in %.6f secs' % (
+            func.__name__, time.time() - t0_))
+        return ret
+    return wrapper
+
 class SimpleFrameMongo(object):
     
     config_settings = None
     
-    def __init__(self):
+    def __init__(self, uri=None, db_name=None):
 
-        db_name = self.config_settings['name'] 
-        mongo_host = self.config_settings['mongo_host']
-        username = self.config_settings['username']
-        password = self.config_settings['password']
-        
-        self.db = pymongo.MongoClient(mongo_host)[db_name]
-        self.db.authenticate(username, password)
+        if uri is None:
+            db_name = self.config_settings['name'] 
+            mongo_host = self.config_settings['mongo_host']
+            username = self.config_settings['username']
+            password = self.config_settings['password']
+            
+            self.db = pymongo.MongoClient(mongo_host)[db_name]
+            self.db.authenticate(username, password)
+        else:
+            if db_name is None:
+                raise Exception('Must provide target db name')
+            self.db = pymongo.MongoClient(uri)[db_name]
         
         self.fs = GridFS(self.db)
         
@@ -46,8 +62,14 @@ class SimpleFrameMongo(object):
             self.fs.delete(_id)
         
     def read(self, name):
-        return pkl.loads(
-            self.fs.find_one({'filename': name}).read())
+
+        @timeit
+        def _read(name):
+            return self.fs.find_one(
+                {'filename': name}).read()
+
+        sr = _read(name)
+        return pkl.loads(sr)
     
     def read_metadata(self, name):
         return self.db['fs.files'].find_one(
