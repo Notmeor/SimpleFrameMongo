@@ -63,7 +63,6 @@ class SimpleFrameMongo(object):
         
     def read(self, name):
 
-        @timeit
         def _read(name):
             return self.fs.find_one(
                 {'filename': name}).read()
