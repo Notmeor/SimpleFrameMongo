@@ -55,11 +55,14 @@ class SimpleFrameMongo(object):
         )
     
     def delete(self, name):
-        doc = self.db['fs.files'].find_one(
-            {'filename': name})
-        if doc:
-            _id = doc.get('_id')
-            self.fs.delete(_id)
+        while True:  # delete all files with given name
+            doc = self.db['fs.files'].find_one(
+                {'filename': name})
+            if doc:
+                _id = doc.get('_id')
+                self.fs.delete(_id)
+            else:
+                break
         
     def read(self, name):
 
