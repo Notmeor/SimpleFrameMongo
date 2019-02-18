@@ -4,7 +4,7 @@ import warnings
 import pymongo
 from gridfs import GridFS
 from bson import ObjectId
-from pandas.io.pickle import pkl
+from framemongo.serializer import serializer
 
 import time, functools
 def timeit(func):
@@ -49,7 +49,7 @@ class SimpleFrameMongo(object):
             return 
                             
         return self.fs.put(
-            pkl.dumps(df, pkl.HIGHEST_PROTOCOL),
+            serializer.serialize(df),
             filename=name,
             metadata=metadata
         )
@@ -69,7 +69,7 @@ class SimpleFrameMongo(object):
                 {'filename': name}).read()
 
         sr = _read(name)
-        return pkl.loads(sr)
+        return serializer.deserialize(sr)
     
     def read_metadata(self, name):
         return self.db['fs.files'].find_one(
@@ -82,8 +82,8 @@ class SimpleFrameMongo(object):
         return self
     
     def __exit__(self, et, ev, tb):
-        self.__del__()
+        self.close()
     
-    def __del__(self):
+    def close(self):
         self.db.client.close()
          
